@@ -2,6 +2,8 @@ package hm.orz.key0note.zaimcalendar;
 
 import android.os.AsyncTask;
 
+import org.apache.http.client.methods.HttpGet;
+
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -96,6 +98,11 @@ public class ZaimOAuthClient {
         mProvider = new CommonsHttpOAuthProvider(REQUEST_TOKEN_URL, ACCESS_TOKEN_URL, AUTHORIZE_URL);
     }
 
+    ZaimOAuthClient(String token, String secret) {
+        this();
+        mConsumer.setTokenWithSecret(token, secret);
+    }
+
     public String getToken() {
         return mConsumer.getToken();
     }
@@ -104,9 +111,17 @@ public class ZaimOAuthClient {
         return mConsumer.getTokenSecret();
     }
 
-    //public void sign(HttpGet httpGet) {
-    //    mConsumer.sign(httpGet);
-    //}
+    public void sign(HttpGet httpGet) {
+        try {
+            mConsumer.sign(httpGet);
+        } catch (OAuthMessageSignerException e) {
+            e.printStackTrace();
+        } catch (OAuthExpectationFailedException e) {
+            e.printStackTrace();
+        } catch (OAuthCommunicationException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void request(String callbackUrl, RequestCallback callback) {
         //

@@ -48,6 +48,9 @@ public class LoginActivity extends ActionBarActivity {
                     public void onComplete() {
                         Log.d(this.getClass().getName(), "ACCESS_TOKEN : " + mZaimOAuthClient.getToken());
                         Log.d(this.getClass().getName(), "ACCESS_TOKEN_SECRET : " + mZaimOAuthClient.getTokenSecret());
+                        SharedPreferenceUtils.setLoginState(getApplicationContext(), true);
+                        SharedPreferenceUtils.setAccessToken(getApplicationContext(), mZaimOAuthClient.getToken());
+                        SharedPreferenceUtils.setAccessTokenSecret(getApplicationContext(), mZaimOAuthClient.getTokenSecret());
 
                         // back to main activity
                         finish();
