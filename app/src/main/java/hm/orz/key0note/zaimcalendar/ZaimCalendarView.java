@@ -3,15 +3,14 @@ package hm.orz.key0note.zaimcalendar;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ZaimCalendarView extends LinearLayout {
@@ -37,7 +36,7 @@ public class ZaimCalendarView extends LinearLayout {
 
     // 週のレイアウト
     private LinearLayout mWeekLayout;
-    private ArrayList<LinearLayout> mWeeks = new ArrayList<LinearLayout>();
+    private LinearLayout mDayOfMonthLayout;
 
     /**
      * コンストラクタ
@@ -56,92 +55,12 @@ public class ZaimCalendarView extends LinearLayout {
      */
     public ZaimCalendarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.setOrientation(VERTICAL);
 
-        createTitleView(context);
-        createWeekViews(context);
-        createDayViews(context);
-    }
+        View layout = LayoutInflater.from(context).inflate(R.layout.view_zaim_calendar, this);
 
-    /**
-     * 年月日表示用のタイトルを生成する
-     *
-     * @param context context
-     */
-    private void createTitleView(Context context) {
-        float scaleDensity = context.getResources().getDisplayMetrics().density;
-
-        mTitleView = new TextView(context);
-        mTitleView.setGravity(Gravity.CENTER_HORIZONTAL); // 中央に表示
-        mTitleView.setTextSize((int) (scaleDensity * 14));
-        mTitleView.setTypeface(null, Typeface.BOLD); // 太字
-        mTitleView.setPadding(0, 0, 0, (int) (scaleDensity * 16));
-
-        addView(mTitleView, new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-    }
-
-    /**
-     * 曜日表示用のビューを生成する
-     *
-     * @param context context
-     */
-    private void createWeekViews(Context context) {
-        float scaleDensity = context.getResources().getDisplayMetrics().density;
-        // 週表示レイアウト
-        mWeekLayout = new LinearLayout(context);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, BIGINNING_DAY_OF_WEEK); // 週の頭をセット
-
-        for (int i = 0; i < WEEKDAYS; i++) {
-            TextView textView = new TextView(context);
-            textView.setGravity(Gravity.RIGHT); // 中央に表示
-            textView.setPadding(0, 0, (int) (scaleDensity * 4), 0);
-
-            LinearLayout.LayoutParams llp =
-                    new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT);
-            llp.weight = 1;
-
-            mWeekLayout.addView(textView, llp);
-
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-        }
-        addView(mWeekLayout, new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-    }
-
-
-    /**
-     * 日付表示用のビューを生成する
-     *
-     * @param context context
-     */
-    private void createDayViews(Context context) {
-        float scaleDensity = context.getResources().getDisplayMetrics().density;
-
-        // カレンダー部 最大6行必要
-        for (int i = 0; i < MAX_WEEK; i++) {
-            LinearLayout weekLine = new LinearLayout(context);
-            mWeeks.add(weekLine);
-
-            // 1週間分の日付ビュー作成
-            for (int j = 0; j < WEEKDAYS; j++) {
-                TextView dayView = new TextView(context);
-                dayView.setSingleLine(false);
-                //dayView.setMaxLines(2);
-                dayView.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-                dayView.setGravity(Gravity.TOP | Gravity.RIGHT);
-                dayView.setPadding(0, (int) (scaleDensity * 4), (int) (scaleDensity * 4), 0);
-                LinearLayout.LayoutParams llp =
-                        new LinearLayout.LayoutParams(0, (int) (scaleDensity * 48));
-                llp.weight = 1;
-                weekLine.addView(dayView, llp);
-            }
-
-            this.addView(weekLine, new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        }
+        mTitleView = (TextView) layout.findViewById(R.id.title);
+        mWeekLayout = (LinearLayout) layout.findViewById(R.id.week_view);
+        mDayOfMonthLayout = (LinearLayout) layout.findViewById(R.id.day_of_month_layout);
     }
 
     /**
@@ -163,11 +82,8 @@ public class ZaimCalendarView extends LinearLayout {
         int count = day + skipCount - 1;
         int row = count / WEEKDAYS;
         int col = count - (WEEKDAYS * row);
-        LinearLayout weekLayout = mWeeks.get(row);
-        TextView dayView = (TextView) weekLayout.getChildAt(col);
-        dayView.setText(
-                String.valueOf(day) + "\n" +
-                        String.valueOf(amount));
+        TextView moneyTextView = getDayOfMonthMoneyTextView(row, col);
+        moneyTextView.setText(String.valueOf(amount));
     }
 
     /**
@@ -218,38 +134,36 @@ public class ZaimCalendarView extends LinearLayout {
         int todayDay = todayCalendar.get(Calendar.DAY_OF_MONTH);
 
         for (int i = 0; i < MAX_WEEK; i++) {
-            LinearLayout weekLayout = mWeeks.get(i);
-            weekLayout.setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
             for (int j = 0; j < WEEKDAYS; j++) {
-                TextView dayView = (TextView) weekLayout.getChildAt(j);
+                TextView dayTextView = getDayOfMonthTextView(i, j);
 
                 // 第一週かつskipCountが残っていれば
                 if (i == 0 && skipCount > 0) {
-                    dayView.setText(" ");
+                    dayTextView.setText("");
                     skipCount--;
                     continue;
                 }
 
                 // 最終日より大きければ
                 if (lastDay < dayCounter) {
-                    dayView.setText(" ");
+                    dayTextView.setText(" ");
                     continue;
                 }
 
                 // 日付を設定
-                dayView.setText(String.valueOf(dayCounter));
+                dayTextView.setText(String.valueOf(dayCounter));
 
                 boolean isToday = todayYear == year &&
                         todayMonth == month &&
                         todayDay == dayCounter;
 
                 if (isToday) {
-                    dayView.setTextColor(TODAY_COLOR); // 赤文字
-                    dayView.setTypeface(null, Typeface.BOLD); // 太字
-                    weekLayout.setBackgroundColor(TODAY_BACKGROUND_COLOR); // 週の背景グレー
+                    dayTextView.setTextColor(TODAY_COLOR); // 赤文字
+                    dayTextView.setTypeface(null, Typeface.BOLD); // 太字
+                    //weekLayout.setBackgroundColor(TODAY_BACKGROUND_COLOR); // 週の背景グレー
                 } else {
-                    dayView.setTextColor(DEFAULT_COLOR);
-                    dayView.setTypeface(null, Typeface.NORMAL);
+                    dayTextView.setTextColor(DEFAULT_COLOR);
+                    dayTextView.setTypeface(null, Typeface.NORMAL);
                 }
                 dayCounter++;
             }
@@ -271,6 +185,20 @@ public class ZaimCalendarView extends LinearLayout {
             skipCount = firstDayOfWeekOfMonth - BIGINNING_DAY_OF_WEEK;
         }
         return skipCount;
+    }
+
+    private LinearLayout getDayOfMonthLinearLayout(int row, int col) {
+        LinearLayout weekLayout = (LinearLayout) mDayOfMonthLayout.getChildAt(row);
+        return (LinearLayout) weekLayout.getChildAt(col);
+    }
+
+    private TextView getDayOfMonthTextView(int row, int col) {
+        return (TextView) getDayOfMonthLinearLayout(row, col).findViewById(R.id.day_text);
+    }
+
+    private TextView getDayOfMonthMoneyTextView(int row, int col) {
+        LinearLayout dayView = getDayOfMonthLinearLayout(row, col);
+        return (TextView) dayView.findViewById(R.id.money_text);
     }
 
     private Calendar getTargetCalendar(int year, int month) {
