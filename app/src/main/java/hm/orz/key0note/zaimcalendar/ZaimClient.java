@@ -15,8 +15,6 @@ import java.io.IOException;
 
 public class ZaimClient {
 
-    private static final String ZAIM_DOMAIN = "https://api.zaim.net";
-
     public interface RequestCallback {
         public void onComplete(String response);
     }
@@ -67,24 +65,11 @@ public class ZaimClient {
         mZaimOAuthClient = zaimOAuthClient;
     }
 
-    public void userVerify(RequestCallback callback) {
-        String urlString = ZAIM_DOMAIN + "/v2/home/user/verify";
-
-        HttpGet httpGet = new HttpGet(urlString);
+    public void sendRequest(ZaimRequest zaimRequest, RequestCallback callback) {
+        HttpGet httpGet = zaimRequest.getHttpGetRequest();
         mZaimOAuthClient.sign(httpGet);
 
         RequsetAsyncTask asyncTask = new RequsetAsyncTask(httpGet, callback);
         asyncTask.execute();
     }
-
-    public void getMoneyList(RequestCallback callback) {
-        String urlString = ZAIM_DOMAIN + "/v2/home/money";
-
-        HttpGet httpGet = new HttpGet(urlString);
-        mZaimOAuthClient.sign(httpGet);
-
-        RequsetAsyncTask asyncTask = new RequsetAsyncTask(httpGet, callback);
-        asyncTask.execute();
-    }
-
 }
