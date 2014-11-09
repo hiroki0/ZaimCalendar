@@ -3,18 +3,10 @@ package hm.orz.key0note.zaimcalendar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -71,41 +63,29 @@ public class MainActivity extends ActionBarActivity {
                     SharedPreferenceUtils.getAccessToken(getApplicationContext()),
                     SharedPreferenceUtils.getAccessTokenSecret(getApplicationContext())
             );
-            ZaimClient client = new ZaimClient(authClient);
-            client.userVerify(new ZaimClient.RequestCallback() {
+            ZaimApiHelper apiHelper = new ZaimApiHelper(authClient);
+            apiHelper.userVerify(new ZaimApiHelper.UserVerifyRequestCallback() {
                 @Override
-                public void onComplete(String response) {
-                    Log.v("zaim api user verify", "response = " + response);
+                public void onComplete() {
+
                 }
             });
-            client.getMoneyList(new ZaimClient.RequestCallback() {
+
+            final int REQ_YEAR = 2014;
+            final int REQ_MONTH = 10;
+            apiHelper.getMoneyList(REQ_YEAR, REQ_MONTH, new ZaimApiHelper.GetMoneyListRequestCallback() {
                 @Override
-                public void onComplete(String response) {
-                    Log.v("zaim api get money list", "response = " + response);
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        JSONArray array = jsonObject.getJSONArray("money");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject data = array.getJSONObject(i);
-                            String dateString = data.getString("date");
-                            String amountString = data.getString("amount");
+                public void onComplete(ZaimMonthData monthData) {
+                    ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
 
-                            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                            format.parse(dateString);
-                            Calendar calendar = format.getCalendar();
+                    for (HashMap.Entry<Integer, ZaimDayData> e : monthData.getZaimDayDataMap().entrySet()) {
+                        int day = e.getKey().intValue();
+                        ZaimDayData dayData = e.getValue();
 
-                            if (calendar.get(Calendar.MONTH) == 9) {
-                                ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
-                                calendarView.setDataOfDay(
-                                        calendar.get(Calendar.MONTH) + 1,
-                                        calendar.get(Calendar.DAY_OF_MONTH),
-                                        Integer.parseInt(amountString));
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                        calendarView.setDataOfDay(
+                                REQ_MONTH,
+                                day,
+                                dayData.getSummaryAmount());
                     }
                 }
             });
