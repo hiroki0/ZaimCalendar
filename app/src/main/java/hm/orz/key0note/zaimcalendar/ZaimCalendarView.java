@@ -13,12 +13,21 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class ZaimCalendarView extends LinearLayout {
+public class ZaimCalendarView extends LinearLayout implements View.OnClickListener {
+
+    /**
+     *
+     */
+    public interface OnDayLayoutClickListener {
+        public void onClick(int day);
+    }
 
     private static final String TAG = ZaimCalendarView.class.getSimpleName();
 
     private static final int WEEKDAYS = 7;
     private static final int MAX_WEEK = 6;
+
+    private static final int UNKNOWN = -1;
 
     // 週の始まりの曜日を保持する
     private static final int BIGINNING_DAY_OF_WEEK = Calendar.SUNDAY;
@@ -37,6 +46,9 @@ public class ZaimCalendarView extends LinearLayout {
     // 週のレイアウト
     private LinearLayout mWeekLayout;
     private LinearLayout mDayOfMonthLayout;
+
+    //
+    private OnDayLayoutClickListener mOnDayLayoutClickListener;
 
     /**
      * コンストラクタ
@@ -61,6 +73,16 @@ public class ZaimCalendarView extends LinearLayout {
         mTitleView = (TextView) layout.findViewById(R.id.title);
         mWeekLayout = (LinearLayout) layout.findViewById(R.id.week_view);
         mDayOfMonthLayout = (LinearLayout) layout.findViewById(R.id.day_of_month_layout);
+
+        setOnClickListenerToDayLayout(this);
+    }
+
+    public void setOnDayLayoutClickListener(OnDayLayoutClickListener l) {
+        mOnDayLayoutClickListener = l;
+    }
+
+    public void removeOnDayLayoutClickListener() {
+        mOnDayLayoutClickListener = null;
     }
 
     /**
@@ -75,6 +97,12 @@ public class ZaimCalendarView extends LinearLayout {
         setDays(year, month);
     }
 
+    /**
+     * 日にち蘭にデータを入力する
+     * @param month 入力先の月
+     * @param day 入力先の日
+     * @param amount 金額
+     */
     public void setDataOfDay(int month, int day, int amount) {
         Log.v(TAG, "month = " + String.valueOf(month) + " day = " + String.valueOf(day) + " amount = " + String.valueOf(amount));
         Calendar targetCalendar = getTargetCalendar(2014, month - 1);
@@ -171,6 +199,29 @@ public class ZaimCalendarView extends LinearLayout {
     }
 
     /**
+     * 日にちのLayoutにOnClickListerをセットする
+     *
+     * @param clickListener セットするOnClickListener
+     */
+    private void setOnClickListenerToDayLayout(OnClickListener clickListener) {
+        for (int i = 0; i < MAX_WEEK; i++) {
+            for (int j = 0; j < WEEKDAYS; j++) {
+                LinearLayout layout = getDayOfMonthLinearLayout(i, j);
+                layout.setOnClickListener(clickListener);
+            }
+        }
+    }
+
+    public void onClick(View v) {
+        int dayNumber = findDayNumberFormDayLayout((LinearLayout)v);
+        if (dayNumber != UNKNOWN) {
+            if (mOnDayLayoutClickListener != null) {
+                mOnDayLayoutClickListener.onClick(dayNumber);
+            }
+        }
+    }
+
+    /**
      * カレンダーの最初の空白の個数を求める
      *
      * @param targetCalendar 指定した月のCalendarのInstance
@@ -187,6 +238,17 @@ public class ZaimCalendarView extends LinearLayout {
         return skipCount;
     }
 
+    private int findDayNumberFormDayLayout(LinearLayout dayLayout) {
+        for (int i = 0; i < MAX_WEEK; i++) {
+            for (int j = 0; j < WEEKDAYS; j++) {
+                if (dayLayout == getDayOfMonthLinearLayout(i, j)) {
+                    return getDayNumber(i, j);
+                }
+            }
+        }
+        return UNKNOWN;
+    }
+
     private LinearLayout getDayOfMonthLinearLayout(int row, int col) {
         LinearLayout weekLayout = (LinearLayout) mDayOfMonthLayout.getChildAt(row);
         return (LinearLayout) weekLayout.getChildAt(col);
@@ -199,6 +261,19 @@ public class ZaimCalendarView extends LinearLayout {
     private TextView getDayOfMonthMoneyTextView(int row, int col) {
         LinearLayout dayView = getDayOfMonthLinearLayout(row, col);
         return (TextView) dayView.findViewById(R.id.money_text);
+    }
+
+    private int getDayNumber(int row, int col) {
+        TextView view = (TextView) getDayOfMonthLinearLayout(row, col).findViewById(R.id.day_text);
+        String dayText = view.getText().toString();
+        try {
+            if (!dayText.equals("")) {
+                return Integer.parseInt(dayText);
+            }
+        } catch (NumberFormatException e) {
+            return UNKNOWN;
+        }
+        return UNKNOWN;
     }
 
     private Calendar getTargetCalendar(int year, int month) {

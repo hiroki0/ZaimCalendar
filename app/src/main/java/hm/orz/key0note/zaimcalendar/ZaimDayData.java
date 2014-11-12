@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 
 public class ZaimDayData {
-    private int mDayNumber;
+
     private ArrayList<ZaimItemData> mZaimItemDataArrayList;
 
     ZaimDayData() {
@@ -21,5 +21,9 @@ public class ZaimDayData {
             summary += itemData.getAmount();
         }
         return summary;
+    }
+
+    public ArrayList<ZaimItemData> getZaimItemDataList() {
+        return mZaimItemDataArrayList;
     }
 }

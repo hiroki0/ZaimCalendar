@@ -76,7 +76,7 @@ public class ZaimApiHelper {
 
                         ZaimItemData itemData = new ZaimItemData();
                         itemData.setAmount(Integer.parseInt(amountString));
-                        monthData.setDataOfDay(calendar.get(Calendar.DAY_OF_MONTH), itemData);
+                        monthData.addItemData(calendar.get(Calendar.DAY_OF_MONTH), itemData);
                     }
                     callback.onComplete(monthData);
                 } catch (JSONException e) {
