@@ -3,9 +3,13 @@ package hm.orz.key0note.zaimcalendar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
@@ -13,13 +17,35 @@ public class MainActivity extends ActionBarActivity {
     private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_CODE_LOGIN = 1;
 
+    private ZaimMonthData mZaimMonthData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final ListView amountListView = (ListView) findViewById(R.id.amount_lit);
+
         ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
         calendarView.set(2014, 10 - 1);
+        calendarView.setOnDayLayoutClickListener(new ZaimCalendarView.OnDayLayoutClickListener() {
+            public void onClick(int day) {
+                Log.v(TAG, "onClick day = " + day);
+
+                ZaimDayData dayData = mZaimMonthData.getDayData(day);
+
+                ArrayList<String> list = new ArrayList<String>();
+                for (ZaimItemData item : dayData.getZaimItemDataList()) {
+                    list.add(String.valueOf(item.getAmount()));
+                }
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        getApplicationContext(),
+                        android.R.layout.simple_expandable_list_item_1,
+                        list);
+                amountListView.setAdapter(adapter);
+            }
+        });
 
         Intent intent = new Intent();
         intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.LoginActivity");
@@ -76,6 +102,8 @@ public class MainActivity extends ActionBarActivity {
             apiHelper.getMoneyList(REQ_YEAR, REQ_MONTH, new ZaimApiHelper.GetMoneyListRequestCallback() {
                 @Override
                 public void onComplete(ZaimMonthData monthData) {
+                    mZaimMonthData = monthData;
+
                     ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
 
                     for (HashMap.Entry<Integer, ZaimDayData> e : monthData.getZaimDayDataMap().entrySet()) {
