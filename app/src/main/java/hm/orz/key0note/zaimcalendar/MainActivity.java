@@ -12,6 +12,10 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import hm.orz.key0note.zaimcalendar.model.ZaimDayData;
+import hm.orz.key0note.zaimcalendar.model.ZaimItemData;
+import hm.orz.key0note.zaimcalendar.model.ZaimMonthData;
+
 public class MainActivity extends ActionBarActivity {
 
     private final String TAG = MainActivity.class.getSimpleName();
@@ -91,6 +95,13 @@ public class MainActivity extends ActionBarActivity {
             );
             ZaimApiHelper apiHelper = new ZaimApiHelper(authClient);
             apiHelper.userVerify(new ZaimApiHelper.UserVerifyRequestCallback() {
+                @Override
+                public void onComplete() {
+
+                }
+            });
+
+            apiHelper.getCategoryList(new ZaimApiHelper.GetCategoryListRequestCallback() {
                 @Override
                 public void onComplete() {
 

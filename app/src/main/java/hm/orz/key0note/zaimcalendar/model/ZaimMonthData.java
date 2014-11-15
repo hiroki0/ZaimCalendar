@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.model;
 
 import java.util.HashMap;
 
@@ -6,7 +6,7 @@ public class ZaimMonthData {
 
     private HashMap<Integer, ZaimDayData> mZaimDayDataMap;
 
-    ZaimMonthData() {
+    public ZaimMonthData() {
         mZaimDayDataMap = new HashMap<Integer, ZaimDayData>();
     }
 
@@ -22,7 +22,6 @@ public class ZaimMonthData {
     }
 
     /**
-     *
      * @param day assign day you want to get day data
      * @return if not exist DayData, return null.
      */
