@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,11 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import hm.orz.key0note.zaimcalendar.R;
+import hm.orz.key0note.zaimcalendar.SharedPreferenceUtils;
+import hm.orz.key0note.zaimcalendar.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.ZaimCalendarView;
+import hm.orz.key0note.zaimcalendar.ZaimOAuthClient;
 import hm.orz.key0note.zaimcalendar.model.ZaimDayData;
 import hm.orz.key0note.zaimcalendar.model.ZaimItemData;
 import hm.orz.key0note.zaimcalendar.model.ZaimMonthData;
@@ -52,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
         });
 
         Intent intent = new Intent();
-        intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.LoginActivity");
+        intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
         MainActivity.this.startActivity(intent);
         startActivityForResult(intent, REQUEST_CODE_LOGIN);
     }

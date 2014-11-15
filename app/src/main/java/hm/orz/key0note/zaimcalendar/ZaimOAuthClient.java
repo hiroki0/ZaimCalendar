@@ -93,12 +93,12 @@ public class ZaimOAuthClient {
     private OAuthConsumer mConsumer;
     private OAuthProvider mProvider;
 
-    ZaimOAuthClient() {
+    public ZaimOAuthClient() {
         mConsumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
         mProvider = new CommonsHttpOAuthProvider(REQUEST_TOKEN_URL, ACCESS_TOKEN_URL, AUTHORIZE_URL);
     }
 
-    ZaimOAuthClient(String token, String secret) {
+    public ZaimOAuthClient(String token, String secret) {
         this();
         mConsumer.setTokenWithSecret(token, secret);
     }

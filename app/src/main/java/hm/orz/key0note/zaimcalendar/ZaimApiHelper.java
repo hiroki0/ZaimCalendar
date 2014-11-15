@@ -23,7 +23,7 @@ public class ZaimApiHelper {
 
     private ZaimClient mZaimClient;
 
-    ZaimApiHelper(ZaimOAuthClient zaimOAuthClient) {
+    public ZaimApiHelper(ZaimOAuthClient zaimOAuthClient) {
         mZaimClient = new ZaimClient(zaimOAuthClient);
     }
 
