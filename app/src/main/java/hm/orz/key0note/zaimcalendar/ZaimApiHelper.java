@@ -11,14 +11,17 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 
 import hm.orz.key0note.zaimcalendar.model.Category;
+import hm.orz.key0note.zaimcalendar.model.CategoryList;
+import hm.orz.key0note.zaimcalendar.model.Genre;
+import hm.orz.key0note.zaimcalendar.model.GenreList;
 import hm.orz.key0note.zaimcalendar.model.ZaimItemData;
 import hm.orz.key0note.zaimcalendar.model.ZaimMonthData;
 
 public class ZaimApiHelper {
 
+    private static final String TAG = ZaimApiHelper.class.getSimpleName();
     private static final String ZAIM_DOMAIN = "https://api.zaim.net";
 
     private ZaimClient mZaimClient;
@@ -74,7 +77,10 @@ public class ZaimApiHelper {
                         JSONObject data = array.getJSONObject(i);
                         String dateString = data.getString("date");
                         String categoryIdString = data.getString("category_id");
+                        String genreIdString = data.getString("genre_id");
                         String amountString = data.getString("amount");
+                        String plage = data.getString("place");
+                        String comment = data.getString("comment");
 
                         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                         format.parse(dateString);
@@ -82,7 +88,10 @@ public class ZaimApiHelper {
 
                         ZaimItemData itemData = new ZaimItemData();
                         itemData.setCategoryId(Integer.parseInt(categoryIdString));
+                        itemData.setGenreId(Integer.parseInt(genreIdString));
                         itemData.setAmount(Integer.parseInt(amountString));
+                        itemData.setPlace(plage);
+                        itemData.setComment(comment);
                         monthData.addItemData(calendar.get(Calendar.DAY_OF_MONTH), itemData);
                     }
                     callback.onComplete(monthData);
@@ -96,7 +105,7 @@ public class ZaimApiHelper {
     }
 
     public interface GetCategoryListRequestCallback {
-        public void onComplete();
+        public void onComplete(CategoryList categoryList);
     }
 
     public void getCategoryList(final GetCategoryListRequestCallback callback) {
@@ -109,7 +118,7 @@ public class ZaimApiHelper {
             public void onComplete(String response) {
                 Log.v("zaim api get category list", "response = " + response);
                 try {
-                    HashMap<Integer, String> parentCategoryMap = new HashMap<Integer, String>();
+                    CategoryList categoryList = new CategoryList();
 
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray categoriesArray = jsonObject.getJSONArray("categories");
@@ -118,28 +127,51 @@ public class ZaimApiHelper {
                         String idString = data.getString("id");
                         String nameString = data.getString("name");
 
-                        parentCategoryMap.put(
-                                Integer.parseInt(idString),
-                                nameString);
-                    }
-
-                    JSONArray moneyArray = jsonObject.getJSONArray("money");
-                    for (int i = 0; i < moneyArray.length(); i++) {
-                        JSONObject data = moneyArray.getJSONObject(i);
-                        String idString = data.getString("id");
-                        String nameString = data.getString("name");
-                        String parentCategoryId = data.getString("parent_category_id");
-
                         Category category = new Category();
                         category.setId(Integer.parseInt(idString));
                         category.setName(nameString);
-
-                        String parentCategoryName = parentCategoryMap.get(Integer.parseInt(parentCategoryId));
-                        if (parentCategoryName != null) {
-                            category.setParentCategoryName(parentCategoryName);
-                        }
+                        categoryList.addCategory(category.getId(), category);
                     }
-                    callback.onComplete();
+                    callback.onComplete(categoryList);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public interface GetGenreListRequestCallback {
+        public void onComplete(GenreList genreList);
+    }
+
+    public void getGenreList(final GetGenreListRequestCallback callback) {
+        String urlString = ZAIM_DOMAIN + "/v2/home/genre";
+
+        ZaimRequest request = new ZaimRequest(urlString);
+        request.addParam("mapping", "1");
+
+        mZaimClient.sendRequest(request, new ZaimClient.RequestCallback() {
+            public void onComplete(String response) {
+                Log.v("zaim api get genre list", "response = " + response);
+                try {
+                    GenreList genreList = new GenreList();
+
+                    JSONObject jsonObject = new JSONObject(response);
+                    JSONArray categoriesArray = jsonObject.getJSONArray("genres");
+                    for (int i = 0; i < categoriesArray.length(); i++) {
+                        JSONObject data = categoriesArray.getJSONObject(i);
+                        String idString = data.getString("id");
+                        String nameString = data.getString("name");
+                        String categoryIdString = data.getString("category_id");
+
+                        Genre genre = new Genre();
+                        genre.setId(Integer.parseInt(idString));
+                        genre.setName(nameString);
+                        genre.setCategoryId(Integer.parseInt(categoryIdString));
+
+                        genreList.addGenre(genre.getId(), genre);
+                    }
+                    callback.onComplete(genreList);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
