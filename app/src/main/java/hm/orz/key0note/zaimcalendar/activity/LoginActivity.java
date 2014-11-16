@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +10,10 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import hm.orz.key0note.zaimcalendar.R;
+import hm.orz.key0note.zaimcalendar.SharedPreferenceUtils;
+import hm.orz.key0note.zaimcalendar.ZaimOAuthClient;
 
 
 public class LoginActivity extends ActionBarActivity {

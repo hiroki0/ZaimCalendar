@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,11 +6,20 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import hm.orz.key0note.zaimcalendar.R;
+import hm.orz.key0note.zaimcalendar.SharedPreferenceUtils;
+import hm.orz.key0note.zaimcalendar.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.model.CategoryList;
+import hm.orz.key0note.zaimcalendar.model.GenreList;
+import hm.orz.key0note.zaimcalendar.model.ZaimDayData;
+import hm.orz.key0note.zaimcalendar.model.ZaimMonthData;
+import hm.orz.key0note.zaimcalendar.view.ZaimCalendarView;
+import hm.orz.key0note.zaimcalendar.view.ZaimItemDataArrayAdapter;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -18,6 +27,8 @@ public class MainActivity extends ActionBarActivity {
     private final int REQUEST_CODE_LOGIN = 1;
 
     private ZaimMonthData mZaimMonthData;
+    private CategoryList mCategoryList;
+    private GenreList mGenreList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,21 +45,18 @@ public class MainActivity extends ActionBarActivity {
 
                 ZaimDayData dayData = mZaimMonthData.getDayData(day);
 
-                ArrayList<String> list = new ArrayList<String>();
-                for (ZaimItemData item : dayData.getZaimItemDataList()) {
-                    list.add(String.valueOf(item.getAmount()));
-                }
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                ZaimItemDataArrayAdapter adapter = new ZaimItemDataArrayAdapter(
                         getApplicationContext(),
                         android.R.layout.simple_expandable_list_item_1,
-                        list);
+                        dayData.getZaimItemDataList(),
+                        mCategoryList,
+                        mGenreList);
                 amountListView.setAdapter(adapter);
             }
         });
 
         Intent intent = new Intent();
-        intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.LoginActivity");
+        intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
         MainActivity.this.startActivity(intent);
         startActivityForResult(intent, REQUEST_CODE_LOGIN);
     }
@@ -94,6 +102,20 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onComplete() {
 
+                }
+            });
+
+            apiHelper.getCategoryList(new ZaimApiHelper.GetCategoryListRequestCallback() {
+                @Override
+                public void onComplete(CategoryList categoryList) {
+                    mCategoryList = categoryList;
+                }
+            });
+
+            apiHelper.getGenreList(new ZaimApiHelper.GetGenreListRequestCallback() {
+                @Override
+                public void onComplete(GenreList genreList) {
+                    mGenreList = genreList;
                 }
             });
 

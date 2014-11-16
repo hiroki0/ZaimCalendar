@@ -13,7 +13,7 @@
         android:layout_height="fill_parent"
         android:orientation="vertical">
 
-        <hm.orz.key0note.zaimcalendar.ZaimCalendarView
+        <hm.orz.key0note.zaimcalendar.view.ZaimCalendarView
             android:id="@+id/calender"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />

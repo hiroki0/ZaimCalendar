@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.model;
 
 import java.util.ArrayList;
 
@@ -7,7 +7,7 @@ public class ZaimDayData {
 
     private ArrayList<ZaimItemData> mZaimItemDataArrayList;
 
-    ZaimDayData() {
+    public ZaimDayData() {
         mZaimItemDataArrayList = new ArrayList<ZaimItemData>();
     }
 
