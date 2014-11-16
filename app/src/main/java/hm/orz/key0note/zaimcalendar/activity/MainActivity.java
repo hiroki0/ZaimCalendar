@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import java.util.Calendar;
 import java.util.HashMap;
 
 import hm.orz.key0note.zaimcalendar.R;
@@ -27,6 +28,7 @@ public class MainActivity extends ActionBarActivity {
     private final int REQUEST_CODE_LOGIN = 1;
 
     private ZaimMonthData mZaimMonthData;
+
     private CategoryList mCategoryList;
     private GenreList mGenreList;
 
@@ -38,12 +40,24 @@ public class MainActivity extends ActionBarActivity {
         final ListView amountListView = (ListView) findViewById(R.id.amount_lit);
 
         ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
-        calendarView.set(2014, 10 - 1);
+
+        // display this month data
+        Calendar today = Calendar.getInstance();
+        calendarView.displayCalendar(
+                today.get(Calendar.YEAR),
+                today.get(Calendar.MONTH) + 1);
         calendarView.setOnDayLayoutClickListener(new ZaimCalendarView.OnDayLayoutClickListener() {
             public void onClick(int day) {
                 Log.v(TAG, "onClick day = " + day);
 
+                if (mZaimMonthData == null) {
+                    return;
+                }
+
                 ZaimDayData dayData = mZaimMonthData.getDayData(day);
+                if (dayData == null) {
+                    return;
+                }
 
                 ZaimItemDataArrayAdapter adapter = new ZaimItemDataArrayAdapter(
                         getApplicationContext(),
@@ -52,6 +66,19 @@ public class MainActivity extends ActionBarActivity {
                         mCategoryList,
                         mGenreList);
                 amountListView.setAdapter(adapter);
+            }
+        });
+        calendarView.setOnChangeDisplayMonthListener(new ZaimCalendarView.OnChangeDisplayMonthListener() {
+            public void onChanged(int year, int month) {
+                // update zaim month data
+                updateMonthData(year, month);
+
+                // clear zaim item list view
+                ZaimItemDataArrayAdapter adapter = (ZaimItemDataArrayAdapter) amountListView.getAdapter();
+                if (adapter != null) {
+                    adapter.clear();
+                    adapter.notifyDataSetChanged();
+                }
             }
         });
 
@@ -93,11 +120,7 @@ public class MainActivity extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == REQUEST_CODE_LOGIN) {
-            ZaimOAuthClient authClient = new ZaimOAuthClient(
-                    SharedPreferenceUtils.getAccessToken(getApplicationContext()),
-                    SharedPreferenceUtils.getAccessTokenSecret(getApplicationContext())
-            );
-            ZaimApiHelper apiHelper = new ZaimApiHelper(authClient);
+            ZaimApiHelper apiHelper = getZaimApiHelper();
             apiHelper.userVerify(new ZaimApiHelper.UserVerifyRequestCallback() {
                 @Override
                 public void onComplete() {
@@ -119,27 +142,11 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
 
-            final int REQ_YEAR = 2014;
-            final int REQ_MONTH = 10;
-            apiHelper.getMoneyList(REQ_YEAR, REQ_MONTH, new ZaimApiHelper.GetMoneyListRequestCallback() {
-                @Override
-                public void onComplete(ZaimMonthData monthData) {
-                    mZaimMonthData = monthData;
 
-                    ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
-
-                    for (HashMap.Entry<Integer, ZaimDayData> e : monthData.getZaimDayDataMap().entrySet()) {
-                        int day = e.getKey().intValue();
-                        ZaimDayData dayData = e.getValue();
-
-                        calendarView.setDataOfDay(
-                                REQ_MONTH,
-                                day,
-                                dayData.getSummaryAmount());
-                    }
-                }
-            });
-
+            ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
+            updateMonthData(
+                    calendarView.getDisplayingYear(),
+                    calendarView.getDisplayingMonth());
         }
         switch (requestCode) {
             case REQUEST_CODE_LOGIN:
@@ -147,5 +154,34 @@ public class MainActivity extends ActionBarActivity {
             default:
                 break;
         }
+    }
+
+    public void updateMonthData(final int year, final int month) {
+        ZaimApiHelper apiHelper = getZaimApiHelper();
+        apiHelper.getMoneyList(year, month, new ZaimApiHelper.GetMoneyListRequestCallback() {
+            @Override
+            public void onComplete(ZaimMonthData monthData) {
+                mZaimMonthData = monthData;
+
+                ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
+
+                for (HashMap.Entry<Integer, ZaimDayData> e : monthData.getZaimDayDataMap().entrySet()) {
+                    int day = e.getKey().intValue();
+                    ZaimDayData dayData = e.getValue();
+
+                    calendarView.setDataOfDay(
+                            day,
+                            dayData.getSummaryAmount());
+                }
+            }
+        });
+    }
+
+    private ZaimApiHelper getZaimApiHelper() {
+        ZaimOAuthClient authClient = new ZaimOAuthClient(
+                SharedPreferenceUtils.getAccessToken(getApplicationContext()),
+                SharedPreferenceUtils.getAccessTokenSecret(getApplicationContext())
+        );
+        return new ZaimApiHelper(authClient);
     }
 }

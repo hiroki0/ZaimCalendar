@@ -2,7 +2,6 @@ package hm.orz.key0note.zaimcalendar.view;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,16 +11,21 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import hm.orz.key0note.zaimcalendar.R;
 
-public class ZaimCalendarView extends LinearLayout implements View.OnClickListener {
+public class ZaimCalendarView extends LinearLayout {
 
     /**
      *
      */
     public interface OnDayLayoutClickListener {
         public void onClick(int day);
+    }
+
+    public interface OnChangeDisplayMonthListener {
+        public void onChanged(int year, int month);
     }
 
     private static final String TAG = ZaimCalendarView.class.getSimpleName();
@@ -33,14 +37,13 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
 
     // 週の始まりの曜日を保持する
     private static final int BIGINNING_DAY_OF_WEEK = Calendar.SUNDAY;
-    // 今日のフォント色
-    private static final int TODAY_COLOR = Color.RED;
-    // 通常のフォント色
-    private static final int DEFAULT_COLOR = Color.DKGRAY;
     // 今週の背景色
     private static final int TODAY_BACKGROUND_COLOR = Color.LTGRAY;
     // 通常の背景色
     private static final int DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
+
+    private int mDisplayingYear;
+    private int mDisplayingMonth;
 
     // 年月表示部分
     private TextView mTitleView;
@@ -49,11 +52,11 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
     private LinearLayout mWeekLayout;
     private LinearLayout mDayOfMonthLayout;
 
-    //
     private OnDayLayoutClickListener mOnDayLayoutClickListener;
+    private OnChangeDisplayMonthListener mOnChangeDisplayMonthListener;
 
     /**
-     * コンストラクタ
+     * Constractor
      *
      * @param context context
      */
@@ -62,7 +65,7 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
     }
 
     /**
-     * コンストラクタ
+     * Constractor
      *
      * @param context context
      * @param attrs   attributeset
@@ -76,7 +79,45 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
         mWeekLayout = (LinearLayout) layout.findViewById(R.id.week_view);
         mDayOfMonthLayout = (LinearLayout) layout.findViewById(R.id.day_of_month_layout);
 
-        setOnClickListenerToDayLayout(this);
+        setOnClickListenerToDayLayout();
+
+        TextView movePrevMonth = (TextView) layout.findViewById(R.id.move_previous_month);
+        movePrevMonth.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                Calendar calendar = new GregorianCalendar(mDisplayingYear, convertToCalendarMonth(mDisplayingMonth), 1);
+                calendar.add(Calendar.MONTH, -1);
+
+                int newDisplayYear = calendar.get(Calendar.YEAR);
+                int newDisplayMonth = convertToRegularMonth(calendar.get(Calendar.MONTH));
+
+                displayCalendar(newDisplayYear, newDisplayMonth);
+                mOnChangeDisplayMonthListener.onChanged(newDisplayYear, newDisplayMonth);
+
+            }
+        });
+
+        TextView moveNextMonth = (TextView) layout.findViewById(R.id.move_next_month);
+        moveNextMonth.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                Calendar calendar = new GregorianCalendar(mDisplayingYear, convertToCalendarMonth(mDisplayingMonth), 1);
+                calendar.add(Calendar.MONTH, 1);
+
+                int newDisplayYear = calendar.get(Calendar.YEAR);
+                int newDisplayMonth = convertToRegularMonth(calendar.get(Calendar.MONTH));
+
+                displayCalendar(newDisplayYear, newDisplayMonth);
+                mOnChangeDisplayMonthListener.onChanged(newDisplayYear, newDisplayMonth);
+
+            }
+        });
+    }
+
+    public int getDisplayingYear() {
+        return mDisplayingYear;
+    }
+
+    public int getDisplayingMonth() {
+        return mDisplayingMonth;
     }
 
     public void setOnDayLayoutClickListener(OnDayLayoutClickListener l) {
@@ -87,33 +128,46 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
         mOnDayLayoutClickListener = null;
     }
 
+    public void setOnChangeDisplayMonthListener(OnChangeDisplayMonthListener l) {
+        mOnChangeDisplayMonthListener = l;
+    }
+
+    public void removeOnChangeDisplayMonthListener() {
+        mOnChangeDisplayMonthListener = null;
+    }
+
     /**
      * 年と月を指定して、カレンダーの表示を初期化する
      *
      * @param year  年の指定
      * @param month 月の指定
      */
-    public void set(int year, int month) {
+    public void displayCalendar(int year, int month) {
+        mDisplayingYear = year;
+        mDisplayingMonth = month;
+
         setTitle(year, month);
         setWeeks();
+        clearDayLayout();
         setDays(year, month);
     }
 
     /**
      * 日にち蘭にデータを入力する
-     * @param month 入力先の月
-     * @param day 入力先の日
+     *
+     * @param day    入力先の日
      * @param amount 金額
      */
-    public void setDataOfDay(int month, int day, int amount) {
-        Log.v(TAG, "month = " + String.valueOf(month) + " day = " + String.valueOf(day) + " amount = " + String.valueOf(amount));
-        Calendar targetCalendar = getTargetCalendar(2014, month - 1);
+    public void setDataOfDay(int day, int amount) {
+        Log.v(TAG, "setDataOfDay day = " + day + " amount = " + amount);
+
+        Calendar targetCalendar = getTargetCalendar(mDisplayingYear, convertToCalendarMonth(mDisplayingMonth));
         int skipCount = getSkipCount(targetCalendar);
         int count = day + skipCount - 1;
         int row = count / WEEKDAYS;
         int col = count - (WEEKDAYS * row);
         TextView moneyTextView = getDayOfMonthMoneyTextView(row, col);
-        moneyTextView.setText(String.valueOf(amount));
+        moneyTextView.setText(String.format("%1$,3d", amount));
     }
 
     /**
@@ -123,7 +177,7 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
      * @param month 月の指定
      */
     private void setTitle(int year, int month) {
-        Calendar targetCalendar = getTargetCalendar(year, month);
+        Calendar targetCalendar = getTargetCalendar(year, convertToCalendarMonth(month));
         // 年月フォーマット文字列
         //String formatString = mTitleView.getContext().getString(R.string.format_month_year);
         String formatString = "y年M月";
@@ -145,6 +199,18 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
         }
     }
 
+    private void clearDayLayout() {
+        for (int i = 0; i < MAX_WEEK; i++) {
+            for (int j = 0; j < WEEKDAYS; j++) {
+                TextView dayTextView = getDayOfMonthTextView(i, j);
+                dayTextView.setText("");
+
+                TextView moneyTextView = getDayOfMonthMoneyTextView(i, j);
+                moneyTextView.setText("");
+            }
+        }
+    }
+
     /**
      * 日付を設定していくメソッド
      *
@@ -152,16 +218,11 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
      * @param month 月の指定
      */
     private void setDays(int year, int month) {
-        Calendar targetCalendar = getTargetCalendar(year, month);
+        Calendar targetCalendar = getTargetCalendar(year, convertToCalendarMonth(month));
 
         int skipCount = getSkipCount(targetCalendar);
         int lastDay = targetCalendar.getActualMaximum(Calendar.DATE);
         int dayCounter = 1;
-
-        Calendar todayCalendar = Calendar.getInstance();
-        int todayYear = todayCalendar.get(Calendar.YEAR);
-        int todayMonth = todayCalendar.get(Calendar.MONTH);
-        int todayDay = todayCalendar.get(Calendar.DAY_OF_MONTH);
 
         for (int i = 0; i < MAX_WEEK; i++) {
             for (int j = 0; j < WEEKDAYS; j++) {
@@ -169,56 +230,40 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
 
                 // 第一週かつskipCountが残っていれば
                 if (i == 0 && skipCount > 0) {
-                    dayTextView.setText("");
                     skipCount--;
                     continue;
                 }
 
                 // 最終日より大きければ
                 if (lastDay < dayCounter) {
-                    dayTextView.setText(" ");
                     continue;
                 }
 
-                // 日付を設定
+                // set day number
                 dayTextView.setText(String.valueOf(dayCounter));
 
-                boolean isToday = todayYear == year &&
-                        todayMonth == month &&
-                        todayDay == dayCounter;
-
-                if (isToday) {
-                    dayTextView.setTextColor(TODAY_COLOR); // 赤文字
-                    dayTextView.setTypeface(null, Typeface.BOLD); // 太字
-                    //weekLayout.setBackgroundColor(TODAY_BACKGROUND_COLOR); // 週の背景グレー
-                } else {
-                    dayTextView.setTextColor(DEFAULT_COLOR);
-                    dayTextView.setTypeface(null, Typeface.NORMAL);
-                }
                 dayCounter++;
             }
         }
     }
 
     /**
-     * 日にちのLayoutにOnClickListerをセットする
-     *
-     * @param clickListener セットするOnClickListener
+     * set onClickLister To Layout of day
      */
-    private void setOnClickListenerToDayLayout(OnClickListener clickListener) {
+    private void setOnClickListenerToDayLayout() {
         for (int i = 0; i < MAX_WEEK; i++) {
             for (int j = 0; j < WEEKDAYS; j++) {
                 LinearLayout layout = getDayOfMonthLinearLayout(i, j);
-                layout.setOnClickListener(clickListener);
-            }
-        }
-    }
-
-    public void onClick(View v) {
-        int dayNumber = findDayNumberFormDayLayout((LinearLayout)v);
-        if (dayNumber != UNKNOWN) {
-            if (mOnDayLayoutClickListener != null) {
-                mOnDayLayoutClickListener.onClick(dayNumber);
+                layout.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        int dayNumber = findDayNumberFormDayLayout((LinearLayout) v);
+                        if (dayNumber != UNKNOWN) {
+                            if (mOnDayLayoutClickListener != null) {
+                                mOnDayLayoutClickListener.onClick(dayNumber);
+                            }
+                        }
+                    }
+                });
             }
         }
     }
@@ -285,5 +330,25 @@ public class ZaimCalendarView extends LinearLayout implements View.OnClickListen
         targetCalendar.set(Calendar.MONTH, month);
         targetCalendar.set(Calendar.DAY_OF_MONTH, 1);
         return targetCalendar;
+    }
+
+    /**
+     * convert from regular use month to java.utils.Calendar month
+     *
+     * @param commonMonth you want to convert regular use month
+     * @return converted java.utils.Calendar month
+     */
+    private int convertToCalendarMonth(int commonMonth) {
+        return commonMonth - 1;
+    }
+
+    /**
+     * convert from java.utils.Calendar month to regular use month
+     *
+     * @param regularMonth you want to convert java.utils.Calendar month
+     * @return converted regular use month
+     */
+    private int convertToRegularMonth(int regularMonth) {
+        return regularMonth + 1;
     }
 }
