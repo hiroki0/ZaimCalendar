@@ -146,17 +146,17 @@ public class ZaimCalendarView extends LinearLayout {
         mDisplayingYear = year;
         mDisplayingMonth = month;
 
-        setTitle(year, month);
-        setWeeks();
+        initializeTitle(year, month);
+        initializeWeekTitle();
         clearDayLayout();
-        setDays(year, month);
+        initalizeAllDayView(year, month);
     }
 
     /**
-     * 日にち蘭にデータを入力する
+     * set money data to day view
      *
-     * @param day    入力先の日
-     * @param amount 金額
+     * @param day    input day
+     * @param amount amount of money
      */
     public void setDataOfDay(int day, int amount) {
         Log.v(TAG, "setDataOfDay day = " + day + " amount = " + amount);
@@ -171,30 +171,29 @@ public class ZaimCalendarView extends LinearLayout {
     }
 
     /**
-     * 指定した年月日をタイトルに設定する
+     * initialize calendar title
      *
-     * @param year  年の指定
-     * @param month 月の指定
+     * @param year  displaying year
+     * @param month displaying month
      */
-    private void setTitle(int year, int month) {
-        Calendar targetCalendar = getTargetCalendar(year, convertToCalendarMonth(month));
-        // 年月フォーマット文字列
-        //String formatString = mTitleView.getContext().getString(R.string.format_month_year);
-        String formatString = "y年M月";
+    private void initializeTitle(int year, int month) {
+        String formatString = getContext().getString(R.string.calendar_title_format);
         SimpleDateFormat formatter = new SimpleDateFormat(formatString);
+
+        Calendar targetCalendar = getTargetCalendar(year, convertToCalendarMonth(month));
         mTitleView.setText(formatter.format(targetCalendar.getTime()));
     }
 
     /**
-     * 曜日を設定する
+     * initialize week title
      */
-    private void setWeeks() {
+    private void initializeWeekTitle() {
         Calendar week = Calendar.getInstance();
-        week.set(Calendar.DAY_OF_WEEK, BIGINNING_DAY_OF_WEEK); // 週の頭をセット
-        SimpleDateFormat weekFormatter = new SimpleDateFormat("E"); // 曜日を取得するフォーマッタ
+        week.set(Calendar.DAY_OF_WEEK, BIGINNING_DAY_OF_WEEK);
+        SimpleDateFormat weekFormatter = new SimpleDateFormat("E");
         for (int i = 0; i < WEEKDAYS; i++) {
             TextView textView = (TextView) mWeekLayout.getChildAt(i);
-            textView.setText(weekFormatter.format(week.getTime())); // テキストに曜日を表示
+            textView.setText(weekFormatter.format(week.getTime()));
             week.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
@@ -212,37 +211,24 @@ public class ZaimCalendarView extends LinearLayout {
     }
 
     /**
-     * 日付を設定していくメソッド
+     * initialize all day view in calendar
      *
-     * @param year  年の指定
-     * @param month 月の指定
+     * @param year  displaying year
+     * @param month displaying month
      */
-    private void setDays(int year, int month) {
+    private void initalizeAllDayView(int year, int month) {
         Calendar targetCalendar = getTargetCalendar(year, convertToCalendarMonth(month));
-
-        int skipCount = getSkipCount(targetCalendar);
-        int lastDay = targetCalendar.getActualMaximum(Calendar.DATE);
-        int dayCounter = 1;
 
         for (int i = 0; i < MAX_WEEK; i++) {
             for (int j = 0; j < WEEKDAYS; j++) {
+                if (isEmptyDayView(targetCalendar, i, j)) {
+                    continue;
+                }
+
                 TextView dayTextView = getDayOfMonthTextView(i, j);
-
-                // 第一週かつskipCountが残っていれば
-                if (i == 0 && skipCount > 0) {
-                    skipCount--;
-                    continue;
-                }
-
-                // 最終日より大きければ
-                if (lastDay < dayCounter) {
-                    continue;
-                }
-
                 // set day number
-                dayTextView.setText(String.valueOf(dayCounter));
-
-                dayCounter++;
+                int day = getDayNumber(targetCalendar, i, j);
+                dayTextView.setText(String.valueOf(day));
             }
         }
     }
@@ -286,14 +272,20 @@ public class ZaimCalendarView extends LinearLayout {
     }
 
     private int findDayNumberFormDayLayout(LinearLayout dayLayout) {
-        for (int i = 0; i < MAX_WEEK; i++) {
-            for (int j = 0; j < WEEKDAYS; j++) {
-                if (dayLayout == getDayOfMonthLinearLayout(i, j)) {
-                    return getDayNumber(i, j);
-                }
+        TextView dayTextView = (TextView) dayLayout.findViewById(R.id.day_text);
+        String dayString = dayTextView.getText().toString();
+        try {
+            if (!"".equals(dayString)) {
+                return Integer.parseInt(dayString);
             }
+        } catch (NumberFormatException e) {
+            return UNKNOWN;
         }
         return UNKNOWN;
+    }
+
+    private boolean isEmptyDayView(Calendar targetCalendar, int row, int col) {
+        return (getDayNumber(targetCalendar, row, col) == UNKNOWN);
     }
 
     private LinearLayout getDayOfMonthLinearLayout(int row, int col) {
@@ -310,17 +302,17 @@ public class ZaimCalendarView extends LinearLayout {
         return (TextView) dayView.findViewById(R.id.money_text);
     }
 
-    private int getDayNumber(int row, int col) {
-        TextView view = (TextView) getDayOfMonthLinearLayout(row, col).findViewById(R.id.day_text);
-        String dayText = view.getText().toString();
-        try {
-            if (!dayText.equals("")) {
-                return Integer.parseInt(dayText);
-            }
-        } catch (NumberFormatException e) {
+    private int getDayNumber(Calendar targetCalendar, int row, int col) {
+        int skipCount = getSkipCount(targetCalendar);
+        int count = row * WEEKDAYS + col;
+        int day = count - skipCount + 1;
+
+        int lastDay = targetCalendar.getActualMaximum(Calendar.DATE);
+        if (day < 1 || lastDay < day) {
             return UNKNOWN;
         }
-        return UNKNOWN;
+
+        return day;
     }
 
     private Calendar getTargetCalendar(int year, int month) {
