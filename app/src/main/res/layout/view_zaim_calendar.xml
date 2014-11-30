@@ -53,7 +53,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/calendar_border">
+        android:background="@drawable/calendar_border"
+        style="@style/AppContentTheme">
 
         <LinearLayout
             android:id="@+id/week_view"

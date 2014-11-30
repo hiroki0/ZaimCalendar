@@ -6,7 +6,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MyActivity">
+    tools:context=".MyActivity"
+    style="@style/AppFrameTheme">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -16,13 +17,17 @@
         <hm.orz.key0note.zaimcalendar.view.ZaimCalendarView
             android:id="@+id/calender"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="@style/AppContentTheme" />
 
         <ListView
             android:id="@+id/amount_lit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/list_selector" />
+            style="@style/AppContentTheme"
+            android:background="@drawable/calendar_border"
+            android:divider="@color/boarder"
+            android:dividerHeight="1sp" />
     </LinearLayout>
 
 </RelativeLayout>

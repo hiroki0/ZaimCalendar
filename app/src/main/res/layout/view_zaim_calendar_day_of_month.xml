@@ -6,7 +6,8 @@
     android:layout_weight="1"
     android:background="@drawable/calendar_border"
     android:clickable="true"
-    android:id="@+id/day_layout">
+    android:id="@+id/day_layout"
+    style="@style/AppContentTheme">
 
     <TextView
         android:id="@+id/day_text"

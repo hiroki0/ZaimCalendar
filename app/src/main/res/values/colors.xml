@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="list_unselected">#000000</color>
-    <color name="list_pressed">#ffa122</color>
-    <color name="list_selected">#ffa122</color>
+    <color name="list_unselected">#FFFFFF</color>
+    <color name="list_pressed">#FFFFFF</color>
+    <color name="list_selected">#FFFFFF</color>
+    <color name="boarder">#555555</color>
 </resources>
