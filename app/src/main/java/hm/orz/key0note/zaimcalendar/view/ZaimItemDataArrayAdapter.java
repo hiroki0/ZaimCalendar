@@ -48,7 +48,7 @@ public class ZaimItemDataArrayAdapter extends ArrayAdapter<ZaimItemData> {
         setCategoryTextView(categoryTextView, itemData);
 
         TextView amountTextView = (TextView) convertView.findViewById(R.id.amount);
-        amountTextView.setText(String.format("%1$,3d", itemData.getAmount()));
+        setAmountTextView(amountTextView, itemData);
 
         TextView placeTextView = (TextView) convertView.findViewById(R.id.place);
         setPlaceTextView(placeTextView, itemData);
@@ -75,6 +75,20 @@ public class ZaimItemDataArrayAdapter extends ArrayAdapter<ZaimItemData> {
         }
 
         categoryTextView.setText(String.format("%s > %s", category.getName(), genre.getName()));
+    }
+
+    private void setAmountTextView(TextView amountTextView, ZaimItemData itemData) {
+        amountTextView.setText(String.format("%1$,3d", itemData.getAmount()));
+
+        // set amount text color
+        if (itemData.getMode() == ZaimItemData.Mode.INCOME) {
+            int color = getContext().getResources().getColor(R.color.income);
+            amountTextView.setTextColor(color);
+
+        } else if (itemData.getMode() == ZaimItemData.Mode.PAYMENT) {
+            int color = getContext().getResources().getColor(R.color.payment);
+            amountTextView.setTextColor(color);
+        }
     }
 
     private void setPlaceTextView(TextView placeTextView, ZaimItemData itemData) {

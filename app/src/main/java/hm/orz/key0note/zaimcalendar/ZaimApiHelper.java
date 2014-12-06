@@ -75,6 +75,7 @@ public class ZaimApiHelper {
                     JSONArray array = jsonObject.getJSONArray("money");
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject data = array.getJSONObject(i);
+                        String modeString = data.getString("mode");
                         String dateString = data.getString("date");
                         String categoryIdString = data.getString("category_id");
                         String genreIdString = data.getString("genre_id");
@@ -92,6 +93,11 @@ public class ZaimApiHelper {
                         itemData.setAmount(Integer.parseInt(amountString));
                         itemData.setPlace(plage);
                         itemData.setComment(comment);
+                        if ("income".equals(modeString)) {
+                            itemData.setMode(ZaimItemData.Mode.INCOME);
+                        } else if ("payment".equals(modeString)) {
+                            itemData.setMode(ZaimItemData.Mode.PAYMENT);
+                        }
                         monthData.addItemData(calendar.get(Calendar.DAY_OF_MONTH), itemData);
                     }
                     callback.onComplete(monthData);
