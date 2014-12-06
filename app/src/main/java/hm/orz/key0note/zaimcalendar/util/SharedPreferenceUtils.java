@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

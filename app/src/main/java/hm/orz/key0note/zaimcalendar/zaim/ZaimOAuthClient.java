@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.zaim;
 
 import android.os.AsyncTask;
 
