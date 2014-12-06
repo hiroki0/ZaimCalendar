@@ -4,4 +4,11 @@
     <color name="list_pressed">#FFFFFF</color>
     <color name="list_selected">#FFFFFF</color>
     <color name="boarder">#555555</color>
+    <color name="disable_content_bg">#F6F6F6</color>
+    <color name="enable_content_bg">#FFFFFF</color>
+    <color name="selected_content_bg">#D6F7C3</color>
+    <color name="sunday">#CE6B6B</color>
+    <color name="saturday">#517CD1</color>
+    <color name="income">#0051F9</color>
+    <color name="payment">#FF0000</color>
 </resources>

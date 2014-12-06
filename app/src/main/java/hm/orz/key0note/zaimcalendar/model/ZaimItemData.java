@@ -2,11 +2,26 @@ package hm.orz.key0note.zaimcalendar.model;
 
 public class ZaimItemData {
 
+    private Mode mMode = Mode.UNKNOWN;
     private int mCategoryId;
     private int mGenreId;
     private int mAmount;
     private String mPlace;
     private String mComment;
+
+    public enum Mode {
+        UNKNOWN,
+        INCOME,
+        PAYMENT,
+    }
+
+    public Mode getMode() {
+        return mMode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mMode = mode;
+    }
 
     public int getCategoryId() {
         return mCategoryId;

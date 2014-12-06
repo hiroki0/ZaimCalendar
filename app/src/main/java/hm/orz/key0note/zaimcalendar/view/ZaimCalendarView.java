@@ -1,7 +1,6 @@
 package hm.orz.key0note.zaimcalendar.view;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,10 +36,6 @@ public class ZaimCalendarView extends LinearLayout {
 
     // 週の始まりの曜日を保持する
     private static final int BIGINNING_DAY_OF_WEEK = Calendar.SUNDAY;
-    // 今週の背景色
-    private static final int TODAY_BACKGROUND_COLOR = Color.LTGRAY;
-    // 通常の背景色
-    private static final int DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
 
     private int mDisplayingYear;
     private int mDisplayingMonth;
@@ -51,6 +46,9 @@ public class ZaimCalendarView extends LinearLayout {
     // 週のレイアウト
     private LinearLayout mWeekLayout;
     private LinearLayout mDayOfMonthLayout;
+
+    //
+    private LinearLayout mSelectedDayOfMonthLinearLayout;
 
     private OnDayLayoutClickListener mOnDayLayoutClickListener;
     private OnChangeDisplayMonthListener mOnChangeDisplayMonthListener;
@@ -167,7 +165,12 @@ public class ZaimCalendarView extends LinearLayout {
         int row = count / WEEKDAYS;
         int col = count - (WEEKDAYS * row);
         TextView moneyTextView = getDayOfMonthMoneyTextView(row, col);
-        moneyTextView.setText(String.format("%1$,3d", amount));
+        moneyTextView.setText(String.format("%1$,3d", Math.abs(amount)));
+        if (amount >= 0) {
+            moneyTextView.setTextColor(getResources().getColor(R.color.income));
+        } else {
+            moneyTextView.setTextColor(getResources().getColor(R.color.payment));
+        }
     }
 
     /**
@@ -222,13 +225,24 @@ public class ZaimCalendarView extends LinearLayout {
         for (int i = 0; i < MAX_WEEK; i++) {
             for (int j = 0; j < WEEKDAYS; j++) {
                 if (isEmptyDayView(targetCalendar, i, j)) {
+                    LinearLayout layout = getDayOfMonthLinearLayout(i, j);
+                    layout.setBackgroundResource(R.drawable.calendar_bordering_disable_content);
                     continue;
                 }
+
+                LinearLayout layout = getDayOfMonthLinearLayout(i, j);
+                layout.setBackgroundResource(R.drawable.calendar_bordering_enable_content);
 
                 TextView dayTextView = getDayOfMonthTextView(i, j);
                 // set day number
                 int day = getDayNumber(targetCalendar, i, j);
                 dayTextView.setText(String.valueOf(day));
+                if (j == 0) {
+                    dayTextView.setTextColor(getResources().getColor(R.color.sunday));
+                } else if (j == WEEKDAYS - 1) {
+                    dayTextView.setTextColor(getResources().getColor(R.color.saturday));
+                }
+
             }
         }
     }
@@ -239,11 +253,19 @@ public class ZaimCalendarView extends LinearLayout {
     private void setOnClickListenerToDayLayout() {
         for (int i = 0; i < MAX_WEEK; i++) {
             for (int j = 0; j < WEEKDAYS; j++) {
-                LinearLayout layout = getDayOfMonthLinearLayout(i, j);
+                final LinearLayout layout = getDayOfMonthLinearLayout(i, j);
                 layout.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         int dayNumber = findDayNumberFormDayLayout((LinearLayout) v);
-                        if (dayNumber != UNKNOWN) {
+                        if (dayNumber != UNKNOWN) { // if enable day was clicked
+                            // change selected day
+                            if (mSelectedDayOfMonthLinearLayout != null) {
+                                mSelectedDayOfMonthLinearLayout.setBackgroundResource(R.drawable.calendar_bordering_enable_content);
+                            }
+                            layout.setBackgroundResource(R.drawable.calendar_bordering_selected_content);
+                            mSelectedDayOfMonthLinearLayout = layout;
+
+                            // notify listener
                             if (mOnDayLayoutClickListener != null) {
                                 mOnDayLayoutClickListener.onClick(dayNumber);
                             }

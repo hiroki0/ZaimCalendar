@@ -4,7 +4,7 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    android:background="@drawable/calendar_border"
+    android:background="@drawable/calendar_bordering_enable_content"
     android:clickable="true"
     android:id="@+id/day_layout"
     style="@style/AppContentTheme">

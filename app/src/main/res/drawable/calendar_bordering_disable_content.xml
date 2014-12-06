@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <stroke android:width="3px" android:color="@color/boarder" />
+    <stroke android:width="1px" android:color="@color/boarder" />
     <padding android:left="2px" android:top="2px"
         android:right="2px" android:bottom="2px" />
-    <corners android:radius="2px" />
+    <solid android:color="@color/disable_content_bg" />
 </shape>

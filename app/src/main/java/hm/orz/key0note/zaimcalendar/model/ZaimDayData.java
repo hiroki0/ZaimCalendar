@@ -18,7 +18,11 @@ public class ZaimDayData {
     public int getSummaryAmount() {
         int summary = 0;
         for (ZaimItemData itemData : mZaimItemDataArrayList) {
-            summary += itemData.getAmount();
+            if (itemData.getMode() == ZaimItemData.Mode.INCOME) {
+                summary += itemData.getAmount();
+            } else if (itemData.getMode() == ZaimItemData.Mode.PAYMENT) {
+                summary -= itemData.getAmount();
+            }
         }
         return summary;
     }
