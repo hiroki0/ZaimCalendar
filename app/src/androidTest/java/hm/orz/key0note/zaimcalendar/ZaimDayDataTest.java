@@ -46,6 +46,9 @@ public class ZaimDayDataTest extends AndroidTestCase {
         ZaimItemData itemData1 = new ZaimItemData();
         ZaimItemData itemData2 = new ZaimItemData();
 
+        itemData1.setMode(ZaimItemData.Mode.INCOME);
+        itemData2.setMode(ZaimItemData.Mode.INCOME);
+
         itemData1.setAmount(ITEM1_AMOUNT);
         itemData2.setAmount(ITEM2_AMOUNT);
 

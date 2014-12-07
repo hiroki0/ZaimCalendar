@@ -11,7 +11,7 @@ import android.webkit.WebViewClient;
 
 import hm.orz.key0note.zaimcalendar.R;
 import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimOAuthClient;
 
 
 public class LoginActivity extends ActionBarActivity {

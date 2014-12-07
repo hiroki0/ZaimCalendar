@@ -5,7 +5,7 @@ import android.test.AndroidTestCase;
 
 import org.apache.http.client.methods.HttpGet;
 
-import hm.orz.key0note.zaimcalendar.zaim.ZaimRequest;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimRequest;
 
 public class ZaimRequestTest extends AndroidTestCase {
 

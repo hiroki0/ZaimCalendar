@@ -11,8 +11,8 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimApiHelper;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimOAuthClient;
 
 public class ObservingAuthStatusService extends Service {
 

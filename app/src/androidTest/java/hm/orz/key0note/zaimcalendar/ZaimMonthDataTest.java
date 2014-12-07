@@ -35,11 +35,13 @@ public class ZaimMonthDataTest extends AndroidTestCase {
 
         ZaimMonthData monthData = new ZaimMonthData();
         ZaimItemData addItem1 = new ZaimItemData();
+        addItem1.setMode(ZaimItemData.Mode.INCOME);
         addItem1.setAmount(AMOUNT1);
         monthData.addItemData(DAY, addItem1);
 
         //over wite item data
         ZaimItemData addItem2 = new ZaimItemData();
+        addItem2.setMode(ZaimItemData.Mode.INCOME);
         addItem2.setAmount(AMOUNT2);
         monthData.addItemData(DAY, addItem2);
 
@@ -56,8 +58,10 @@ public class ZaimMonthDataTest extends AndroidTestCase {
 
         ZaimMonthData monthData = new ZaimMonthData();
         ZaimItemData addItem = new ZaimItemData();
+        addItem.setMode(ZaimItemData.Mode.INCOME);
         addItem.setAmount(OLD_AMOUNT);
         monthData.addItemData(DAY, addItem);
+
         // edit inserted item
         addItem.setAmount(NEW_AMOUNT);
 

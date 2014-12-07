@@ -24,8 +24,8 @@ import hm.orz.key0note.zaimcalendar.service.ObservingAuthStatusService;
 import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
 import hm.orz.key0note.zaimcalendar.view.ZaimCalendarView;
 import hm.orz.key0note.zaimcalendar.view.ZaimItemDataArrayAdapter;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimApiHelper;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.zaimapi.ZaimOAuthClient;
 
 public class MainActivity extends ActionBarActivity {
 

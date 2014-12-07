@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar.zaim;
+package hm.orz.key0note.zaimcalendar.zaimapi;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -13,7 +13,7 @@ public class ZaimRequest {
     private String mUrlString;
     private ArrayList<NameValuePair> mParams;
 
-    ZaimRequest(String urlString) {
+    public ZaimRequest(String urlString) {
         mUrlString = urlString;
         mParams = new ArrayList<NameValuePair>();
     }
