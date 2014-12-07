@@ -11,4 +11,6 @@
     <color name="saturday">#517CD1</color>
     <color name="income">#0051F9</color>
     <color name="payment">#FF0000</color>
+    <color name="place">#555555</color>
+    <color name="comment">#555555</color>
 </resources>
