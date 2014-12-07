@@ -49,15 +49,6 @@ public class MainActivity extends ActionBarActivity {
         }
     };
 
-    public class SimpleReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (ObservingAuthStatusService.ACTION_LOGIN_FAILED.equals(intent.getAction())) {
-
-            }
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,10 +101,10 @@ public class MainActivity extends ActionBarActivity {
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Intent i = new Intent();
-                i.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
-                MainActivity.this.startActivity(i);
-                startActivityForResult(i, REQUEST_CODE_LOGIN);
+                // write that the authentication is disable
+                SharedPreferenceUtils.setLoginState(getApplicationContext(), false);
+                // stat LoginActivity to in order to redo authentication
+                startLoginActivity();
             }
         }, filter);
 
@@ -129,6 +120,11 @@ public class MainActivity extends ActionBarActivity {
     public void onStart() {
         super.onStart();
 
+        if (!SharedPreferenceUtils.isLogin(getApplicationContext())) {
+            startLoginActivity();
+        }
+
+        //
         Intent intent = new Intent(getApplicationContext(), ObservingAuthStatusService.class);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -153,6 +149,12 @@ public class MainActivity extends ActionBarActivity {
                     calendarView.getDisplayingYear(),
                     calendarView.getDisplayingMonth());
         }
+    }
+
+    private void startLoginActivity() {
+        Intent i = new Intent();
+        i.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
+        startActivityForResult(i, REQUEST_CODE_LOGIN);
     }
 
     private void updateGenreList() {
