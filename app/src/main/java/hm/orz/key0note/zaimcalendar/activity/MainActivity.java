@@ -16,16 +16,16 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 import hm.orz.key0note.zaimcalendar.R;
-import hm.orz.key0note.zaimcalendar.service.ObservingAuthStatusService;
-import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimApiHelper;
-import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
 import hm.orz.key0note.zaimcalendar.model.CategoryList;
 import hm.orz.key0note.zaimcalendar.model.GenreList;
 import hm.orz.key0note.zaimcalendar.model.ZaimDayData;
 import hm.orz.key0note.zaimcalendar.model.ZaimMonthData;
+import hm.orz.key0note.zaimcalendar.service.ObservingAuthStatusService;
+import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
 import hm.orz.key0note.zaimcalendar.view.ZaimCalendarView;
 import hm.orz.key0note.zaimcalendar.view.ZaimItemDataArrayAdapter;
+import hm.orz.key0note.zaimcalendar.zaim.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -36,6 +36,16 @@ public class MainActivity extends ActionBarActivity {
 
     private CategoryList mCategoryList;
     private GenreList mGenreList;
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // write that the authentication is disable
+            SharedPreferenceUtils.setLoginState(getApplicationContext(), false);
+            // stat LoginActivity to in order to redo authentication
+            startLoginActivity();
+        }
+    };
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -98,15 +108,7 @@ public class MainActivity extends ActionBarActivity {
         // regist login activity dispatcher
         IntentFilter filter = new IntentFilter();
         filter.addAction(ObservingAuthStatusService.ACTION_LOGIN_FAILED);
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // write that the authentication is disable
-                SharedPreferenceUtils.setLoginState(getApplicationContext(), false);
-                // stat LoginActivity to in order to redo authentication
-                startLoginActivity();
-            }
-        }, filter);
+        registerReceiver(mBroadcastReceiver, filter);
 
         // get data from zaim, and update display
         updateCategoryList();
@@ -114,6 +116,12 @@ public class MainActivity extends ActionBarActivity {
         updateMonthData(
                 calendarView.getDisplayingYear(),
                 calendarView.getDisplayingMonth());
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(mBroadcastReceiver);
+        super.onDestroy();
     }
 
     @Override

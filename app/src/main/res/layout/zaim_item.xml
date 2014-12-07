@@ -33,7 +33,8 @@
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="5sp"
                 android:layout_weight="1"
-                android:text="place" />
+                android:text="place"
+                android:textColor="@color/place" />
 
             <TextView
                 android:id="@+id/comment"
@@ -42,7 +43,8 @@
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="5sp"
                 android:layout_weight="1"
-                android:text="comment" />
+                android:text="comment"
+                android:textColor="@color/comment" />
 
         </LinearLayout>
 

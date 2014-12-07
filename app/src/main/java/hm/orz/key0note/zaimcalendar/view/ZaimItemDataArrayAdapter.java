@@ -69,12 +69,18 @@ public class ZaimItemDataArrayAdapter extends ArrayAdapter<ZaimItemData> {
         int genreId = itemData.getGenreId();
         Category category = mCategoryList.getCategory(categoryId);
         Genre genre = mGenreList.getGenre(genreId);
-        if (category == null || genre == null) {
-            categoryTextView.setText("unknown");
-            return;
-        }
 
-        categoryTextView.setText(String.format("%s > %s", category.getName(), genre.getName()));
+        if (genre == null && category == null) {
+            categoryTextView.setText("unknown");
+        }
+        else if (genre == null && category != null) {
+            categoryTextView.setText(String.format("%s", category.getName()));
+        }
+        else if (genre != null && category == null) {
+            categoryTextView.setText(String.format("%s", genre.getName()));
+        } else {
+            categoryTextView.setText(String.format("%s > %s", category.getName(), genre.getName()));
+        }
     }
 
     private void setAmountTextView(TextView amountTextView, ZaimItemData itemData) {
