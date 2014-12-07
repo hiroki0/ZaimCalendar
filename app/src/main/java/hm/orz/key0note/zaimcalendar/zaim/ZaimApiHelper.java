@@ -68,9 +68,16 @@ public class ZaimApiHelper {
 
         mZaimClient.sendRequest(request, new ZaimClient.RequestCallback() {
             public void onComplete(String response) {
-                Log.v("zaim api get money list", "response = " + response);
+                Log.v(TAG, "zaim api get money list response = " + response);
+
+                ZaimMonthData monthData = new ZaimMonthData();
+
+                if (response == null) {
+                    callback.onComplete(monthData);
+                    return;
+                }
+
                 try {
-                    ZaimMonthData monthData = new ZaimMonthData();
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray array = jsonObject.getJSONArray("money");
                     for (int i = 0; i < array.length(); i++) {
@@ -100,12 +107,12 @@ public class ZaimApiHelper {
                         }
                         monthData.addItemData(calendar.get(Calendar.DAY_OF_MONTH), itemData);
                     }
-                    callback.onComplete(monthData);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
+                callback.onComplete(monthData);
             }
         });
     }
@@ -122,10 +129,16 @@ public class ZaimApiHelper {
 
         mZaimClient.sendRequest(request, new ZaimClient.RequestCallback() {
             public void onComplete(String response) {
-                Log.v("zaim api get category list", "response = " + response);
-                try {
-                    CategoryList categoryList = new CategoryList();
+                Log.v(TAG, "zaim api get category list response = " + response);
 
+                CategoryList categoryList = new CategoryList();
+
+                if (response == null) {
+                    callback.onComplete(categoryList);
+                    return;
+                }
+
+                try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray categoriesArray = jsonObject.getJSONArray("categories");
                     for (int i = 0; i < categoriesArray.length(); i++) {
@@ -138,10 +151,10 @@ public class ZaimApiHelper {
                         category.setName(nameString);
                         categoryList.addCategory(category.getId(), category);
                     }
-                    callback.onComplete(categoryList);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                callback.onComplete(categoryList);
             }
         });
     }
@@ -158,10 +171,16 @@ public class ZaimApiHelper {
 
         mZaimClient.sendRequest(request, new ZaimClient.RequestCallback() {
             public void onComplete(String response) {
-                Log.v("zaim api get genre list", "response = " + response);
-                try {
-                    GenreList genreList = new GenreList();
+                Log.v(TAG, "zaim api get genre list response = " + response);
 
+                GenreList genreList = new GenreList();
+
+                if (response == null) {
+                    callback.onComplete(genreList);
+                    return;
+                }
+
+                try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray categoriesArray = jsonObject.getJSONArray("genres");
                     for (int i = 0; i < categoriesArray.length(); i++) {
@@ -177,10 +196,10 @@ public class ZaimApiHelper {
 
                         genreList.addGenre(genre.getId(), genre);
                     }
-                    callback.onComplete(genreList);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                callback.onComplete(genreList);
             }
         });
     }
