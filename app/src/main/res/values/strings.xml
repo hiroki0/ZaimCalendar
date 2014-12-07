@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ZaimCalendarView</string>
+    <string name="app_name">ZaimCalendarViewer</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Login画面</string>
     <string name="calendar_title_format">y年M月</string>
