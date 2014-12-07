@@ -4,16 +4,14 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import hm.orz.key0note.zaimcalendar.R;
-import hm.orz.key0note.zaimcalendar.SharedPreferenceUtils;
-import hm.orz.key0note.zaimcalendar.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
+import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
 
 
 public class LoginActivity extends ActionBarActivity {

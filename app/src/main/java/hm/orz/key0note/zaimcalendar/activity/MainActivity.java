@@ -1,20 +1,25 @@
 package hm.orz.key0note.zaimcalendar.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.ListView;
 
 import java.util.Calendar;
 import java.util.HashMap;
 
 import hm.orz.key0note.zaimcalendar.R;
-import hm.orz.key0note.zaimcalendar.SharedPreferenceUtils;
-import hm.orz.key0note.zaimcalendar.ZaimApiHelper;
-import hm.orz.key0note.zaimcalendar.ZaimOAuthClient;
+import hm.orz.key0note.zaimcalendar.service.ObservingAuthStatusService;
+import hm.orz.key0note.zaimcalendar.util.SharedPreferenceUtils;
+import hm.orz.key0note.zaimcalendar.zaim.ZaimApiHelper;
+import hm.orz.key0note.zaimcalendar.zaim.ZaimOAuthClient;
 import hm.orz.key0note.zaimcalendar.model.CategoryList;
 import hm.orz.key0note.zaimcalendar.model.GenreList;
 import hm.orz.key0note.zaimcalendar.model.ZaimDayData;
@@ -31,6 +36,18 @@ public class MainActivity extends ActionBarActivity {
 
     private CategoryList mCategoryList;
     private GenreList mGenreList;
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,15 +95,45 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        Intent intent = new Intent();
-        intent.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
-        MainActivity.this.startActivity(intent);
-        startActivityForResult(intent, REQUEST_CODE_LOGIN);
+        // regist login activity dispatcher
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ObservingAuthStatusService.ACTION_LOGIN_FAILED);
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // write that the authentication is disable
+                SharedPreferenceUtils.setLoginState(getApplicationContext(), false);
+                // stat LoginActivity to in order to redo authentication
+                startLoginActivity();
+            }
+        }, filter);
+
+        // get data from zaim, and update display
+        updateCategoryList();
+        updateGenreList();
+        updateMonthData(
+                calendarView.getDisplayingYear(),
+                calendarView.getDisplayingMonth());
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
+
+        if (!SharedPreferenceUtils.isLogin(getApplicationContext())) {
+            startLoginActivity();
+        }
+
+        //
+        Intent intent = new Intent(getApplicationContext(), ObservingAuthStatusService.class);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        unbindService(mServiceConnection);
     }
 
     @Override
@@ -94,40 +141,41 @@ public class MainActivity extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == REQUEST_CODE_LOGIN) {
-            ZaimApiHelper apiHelper = getZaimApiHelper();
-            apiHelper.userVerify(new ZaimApiHelper.UserVerifyRequestCallback() {
-                @Override
-                public void onComplete() {
-
-                }
-            });
-
-            apiHelper.getCategoryList(new ZaimApiHelper.GetCategoryListRequestCallback() {
-                @Override
-                public void onComplete(CategoryList categoryList) {
-                    mCategoryList = categoryList;
-                }
-            });
-
-            apiHelper.getGenreList(new ZaimApiHelper.GetGenreListRequestCallback() {
-                @Override
-                public void onComplete(GenreList genreList) {
-                    mGenreList = genreList;
-                }
-            });
-
+            updateCategoryList();
+            updateGenreList();
 
             ZaimCalendarView calendarView = (ZaimCalendarView) findViewById(R.id.calender);
             updateMonthData(
                     calendarView.getDisplayingYear(),
                     calendarView.getDisplayingMonth());
         }
-        switch (requestCode) {
-            case REQUEST_CODE_LOGIN:
-                break;
-            default:
-                break;
-        }
+    }
+
+    private void startLoginActivity() {
+        Intent i = new Intent();
+        i.setClassName("hm.orz.key0note.zaimcalendar", "hm.orz.key0note.zaimcalendar.activity.LoginActivity");
+        startActivityForResult(i, REQUEST_CODE_LOGIN);
+    }
+
+    private void updateGenreList() {
+        ZaimApiHelper apiHelper = getZaimApiHelper();
+
+        apiHelper.getGenreList(new ZaimApiHelper.GetGenreListRequestCallback() {
+            @Override
+            public void onComplete(GenreList genreList) {
+                mGenreList = genreList;
+            }
+        });
+    }
+
+    private void updateCategoryList() {
+        ZaimApiHelper apiHelper = getZaimApiHelper();
+        apiHelper.getCategoryList(new ZaimApiHelper.GetCategoryListRequestCallback() {
+            @Override
+            public void onComplete(CategoryList categoryList) {
+                mCategoryList = categoryList;
+            }
+        });
     }
 
     public void updateMonthData(final int year, final int month) {
@@ -166,4 +214,5 @@ public class MainActivity extends ActionBarActivity {
             adapter.notifyDataSetChanged();
         }
     }
+
 }

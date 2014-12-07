@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.zaim;
 
 
 import android.util.Log;
@@ -31,7 +31,7 @@ public class ZaimApiHelper {
     }
 
     public interface UserVerifyRequestCallback {
-        public void onComplete();
+        public void onComplete(boolean isLogin);
     }
 
     public void userVerify(final UserVerifyRequestCallback callback) {
@@ -40,8 +40,8 @@ public class ZaimApiHelper {
         ZaimRequest request = new ZaimRequest(urlString);
         mZaimClient.sendRequest(request, new ZaimClient.RequestCallback() {
             public void onComplete(String response) {
-                Log.v("zaim api user verify", "response = " + response);
-                callback.onComplete();
+                boolean isLogin = (response != null);
+                callback.onComplete(isLogin);
             }
         });
     }

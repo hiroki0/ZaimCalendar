@@ -1,4 +1,4 @@
-package hm.orz.key0note.zaimcalendar;
+package hm.orz.key0note.zaimcalendar.zaim;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
