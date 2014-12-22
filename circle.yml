@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   pre:
-    - echo y | android update sdk --no-ui --all --filter "android-19,build-tools-19.0.0"
+    - echo y | android update sdk --no-ui --all --filter "android-19,build-tools-19.1.0"
     - echo y | android update lib-project --path ./appcompat --target android-19
     - echo y | android update project --path ./core --library ../appcompat --target android-19
 
